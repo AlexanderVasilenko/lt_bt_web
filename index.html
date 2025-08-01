@@ -1,1 +1,41 @@
-<html><body>Wheel placeholder</body></html>
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Lottery Wheel</title>
+<script src="https://cdn.jsdelivr.net/npm/winwheel@2.9.0/dist/Winwheel.min.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+ body{margin:0;background:#111;display:flex;justify-content:center;align-items:center;height:100vh;color:#fff;font-family:sans-serif}
+ #ptr{position:absolute;left:50%;top:50%;margin-left:-15px;margin-top:-150px;border-left:15px solid transparent;border-right:15px solid transparent;border-bottom:30px solid #eee}
+</style>
+</head>
+<body>
+<canvas id="wheel" width="300" height="300"></canvas><div id="ptr"></div>
+
+<script>
+const q   = new URLSearchParams(location.search);
+const players = JSON.parse(q.get('players')||'[]');
+const colors  = ["#e74c3c","#27ae60","#2980b9","#f1c40f","#9b59b6","#1abc9c"];
+const segs    = players.map((n,i)=>({fillStyle:colors[i%colors.length], text:n}));
+
+const wheel = new Winwheel({
+  canvasId: 'wheel',
+  numSegments: segs.length,
+  segments: segs,
+  textFontSize: 18,
+  animation:{
+    type:'spinToStop',
+    duration:5,
+    spins:8,
+    callbackFinished: seg=>{
+      Telegram.WebApp.sendData(JSON.stringify({winner:seg.text}));
+      Telegram.WebApp.close();
+    }
+  }
+});
+
+setTimeout(()=>wheel.startAnimation(), 600);
+</script>
+</body>
+</html>
